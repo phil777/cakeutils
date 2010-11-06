@@ -21,6 +21,12 @@ def stradd(a, b):
     lb = len(b)
     return "".join(chr((ord(a[i%la])+ord(b[i%lb]))%256) for i in xrange(max(la,lb)))
 
+def strsub(a, b):
+    "returns (a-b)%256, byte by byte. Shorter string wraps"
+    la = len(a)
+    lb = len(b)
+    return "".join(chr((ord(a[i%la])-ord(b[i%lb]))%256) for i in xrange(max(la,lb)))
+
 
 
 def printable(x):
