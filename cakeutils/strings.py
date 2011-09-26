@@ -59,3 +59,23 @@ def hexdump(x):
         print printable(x[i:i+16])
         i += 16
 
+def shexdump(x):
+    s = []
+    x=str(x)
+    l = len(x)
+    i = 0
+    while i < l:
+        line = "%04x   " % i
+        for j in range(16):
+            if i+j < l:
+                line += "%02X " % ord(x[i+j])
+            else:
+                line += "   "
+            if j%16 == 7:
+                line += " "
+        line += "  "
+        line += printable(x[i:i+16])
+        s.append(line)
+        i += 16
+    return "\n".join(s)
+
