@@ -2,8 +2,8 @@
 
 
 
-from ctypes import c_uint,c_int,POINTER,c_void_p,c_char,create_string_buffer,string_at,Structure,cdll,cast,pointer,sizeof,byref
-import struct
+from ctypes import c_uint,c_int,POINTER,c_void_p,create_string_buffer,string_at,Structure,cdll,cast,pointer,sizeof,byref,c_short,c_ushort,c_uint32,c_byte
+import struct,socket
 
 # 32bits only
 c_size_t = c_uint
@@ -37,13 +37,17 @@ class c_cmsghdr(Structure):
         ("len", c_socklen_t),
         ("level", c_int),
         ("type", c_int),
-        ("data", c_char*0)
+        ("data", c_byte*0)
         )
 
 c_cmsghdr_p = POINTER(c_cmsghdr)
 
 class c_sockaddr_in(Structure):
     _fields_ = (
+        ("family", c_short),
+        ("port", c_ushort),
+        ("addr", c_byte*4),
+        ("zero", c_byte*8),
 )
 
 libc = cdll.LoadLibrary("libc.so.6")
@@ -71,10 +75,11 @@ def recvmsg(sock, flags=0, bufsize=1024):
     ret = libc.recvmsg(sockfd, byref(msg), flags)
     if ret == -1:
         raise Exception("recvmsg error (%i)" % get_errno())
-    
-    
+        
     data = string_at(iov.base, ret)
     
+    from_ = socket.inet_ntoa(sin.addr), socket.ntohs(sin.port)
+
     ctrl = string_at(msg.control, msg.controllen)
 
     ofs = 0
@@ -87,7 +92,7 @@ def recvmsg(sock, flags=0, bufsize=1024):
         messages[lvl,typ] = ctrl[ofs+fmtsz:ofs+l]
         ofs += l
 
-    return data, messages
+    return data, from_, messages
 
 
 
