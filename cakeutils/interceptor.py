@@ -186,7 +186,17 @@ def intercept(port, udp=True, tcp=True, callback = cb_log):
                     d2 = protected_callback(cnxid, 1, data)
                     if d2 is not None:
                         data = d2
-                    t2.send(data)
+                    try:
+                        t2.send(data)
+                    except socket.error,e:
+                        log.info("Closing UDP %s (%s)" % (dispcnx(cnxid, 1),e))
+                        intudp.remove(t)
+                        intudp.remove(t2)
+                        selsock.remove(t)
+                        selsock.remove(t2)
+                        del(udp_cnx[cnxid])
+
+                        close_pair(t, udp_pairs)
     
                 elif sk in inttcp:
                     cnxid,dir = infos[sk]
