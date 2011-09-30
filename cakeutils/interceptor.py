@@ -221,8 +221,8 @@ def intercept(port, udp=True, tcp=True, callback = cb_log):
                     try:
                         data = sk.recv(8192)
                     except socket.error,e:
-                        if e.errno == 111: # connection refused
-                            log.info("UDP refused for %s. Closing" % dispcnx(cnxid, dir))
+                        if e.errno in [111,113]: # connection refused/no route to host
+                            log.info("UDP failed for %s (%s). Closing." % (e,dispcnx(cnxid, dir)))
                             intudp.remove(sk)
                             intudp.remove(sk2)
                             selsock.remove(sk)
