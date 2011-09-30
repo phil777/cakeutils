@@ -43,7 +43,7 @@ def system(cmd, canfail=False):
 
 
 def cb_log(cnxid, dir, data):
-    log.debug("%s: %s" % (dispcnx(cnxid, dir), display(data)))
+    log.debug("%s: len=%i %s" % (dispcnx(cnxid, dir), len(data), display(data)))
 
 def intercept(port, udp=True, tcp=True, callback = cb_log):
     
