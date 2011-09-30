@@ -125,7 +125,7 @@ def intercept(port, udp=True, tcp=True, callback = cb_log):
                     dst_ip = socket.inet_ntoa(dst_ip)
                     dst = (dst_ip, dst_port)
                     cnxid = src+dst+("TCP",)
-                    log.info("Intercepted TCP %s" % dispcnx(cnxid, 1))
+                    log.info("Intercepted %s" % dispcnx(cnxid, 1))
     
                     t2 = socket.socket()
                     t2.setsockopt(socket.SOL_IP, IP_TRANSPARENT, 1)
@@ -156,7 +156,7 @@ def intercept(port, udp=True, tcp=True, callback = cb_log):
                     
     
                     if cnxid not in udp_cnx:
-                        log.info("Intercepted UDP %s" % dispcnx(cnxid, 1))
+                        log.info("Intercepted %s" % dispcnx(cnxid, 1))
     
                         t = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                         t.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  
