@@ -295,15 +295,16 @@ def main(*argv, **kargs):
                       help="configure system")
     parser.add_option("-D", dest="deconfigure", action="store_true",
                       help="only configure system")
-
+    parser.add_option("--chain", dest="chain", default="INTERCEPT",
+                      help="use CHAIN as NetFilter interception chain", metavar="CHAIN")
+    parser.add_option("--mark", dest="mark", type="int", default=42,
+                      help="use MARK as NetFilter packet mark for ip rule", metavar="MARK")
+    parser.add_option("--table", dest="tablenum", type="int", default=101,
+                      help="use TABLE for interception routing table number", metavar="TABLE")
                  
 
     (options,args) = parser.parse_args(list(argv))
 
-    options.tpmark = 42
-    options.mark = 42
-    options.tablenum = 101
-    
     # configure logging
     log.setLevel(logging.DEBUG)
     console_handler = logging.StreamHandler()
@@ -315,21 +316,21 @@ def main(*argv, **kargs):
     
     if options.configure or options.deconfigure:
         cf = Configurator()
-        cf.add_init("iptables -t mangle -N INTERCEPT")
-        cf.add_fini("iptables -t mangle -X INTERCEPT")
-        cf.add_init("iptables -t mangle -A INTERCEPT -j MARK --set-mark {0.mark}".format(options),
-                    "iptables -t mangle -A INTERCEPT -j ACCEPT")
-        cf.add_fini("iptables -t mangle -F INTERCEPT")
-        cf.add_init("iptables -t mangle -A PREROUTING -p tcp -m socket -j INTERCEPT")
-        cf.add_fini("iptables -t mangle -D PREROUTING -p tcp -m socket -j INTERCEPT")
+        cf.add_init("iptables -t mangle -N {0.chain}".format(options))
+        cf.add_fini("iptables -t mangle -X {0.chain}".format(options))
+        cf.add_init("iptables -t mangle -A {0.chain} -j MARK --set-mark {0.mark}".format(options),
+                    "iptables -t mangle -A {0.chain} -j ACCEPT".format(options))
+        cf.add_fini("iptables -t mangle -F {0.chain}".format(options))
+        cf.add_init("iptables -t mangle -A PREROUTING -p tcp -m socket -j {0.chain}".format(options))
+        cf.add_fini("iptables -t mangle -D PREROUTING -p tcp -m socket -j {0.chain}".format(options))
         cf.add_init("ip rule add fwmark {0.mark} lookup {0.tablenum}".format(options))
         cf.add_fini("ip rule del fwmark {0.mark} lookup {0.tablenum}".format(options))
         cf.add_init("ip route add local 0/0 dev lo table {0.tablenum}".format(options))
         cf.add_fini("ip route del local 0/0 dev lo table {0.tablenum}".format(options))
-        cf.add_init("iptables -t mangle -A PREROUTING -p udp -i {0.iface} {0.filter} -j TPROXY --on-port {0.port} --tproxy-mark {0.tpmark}".format(options))
-        cf.add_fini("iptables -t mangle -D PREROUTING -p udp -i {0.iface} {0.filter} -j TPROXY --on-port {0.port} --tproxy-mark {0.tpmark}".format(options))
-        cf.add_init("iptables -t mangle -A PREROUTING -p tcp -i {0.iface} {0.filter} -j TPROXY --on-port {0.port} --tproxy-mark {0.tpmark}".format(options))
-        cf.add_fini("iptables -t mangle -D PREROUTING -p tcp -i {0.iface} {0.filter} -j TPROXY --on-port {0.port} --tproxy-mark {0.tpmark}".format(options))
+        cf.add_init("iptables -t mangle -A PREROUTING -p udp -i {0.iface} {0.filter} -j TPROXY --on-port {0.port} --tproxy-mark {0.mark}".format(options))
+        cf.add_fini("iptables -t mangle -D PREROUTING -p udp -i {0.iface} {0.filter} -j TPROXY --on-port {0.port} --tproxy-mark {0.mark}".format(options))
+        cf.add_init("iptables -t mangle -A PREROUTING -p tcp -i {0.iface} {0.filter} -j TPROXY --on-port {0.port} --tproxy-mark {0.mark}".format(options))
+        cf.add_fini("iptables -t mangle -D PREROUTING -p tcp -i {0.iface} {0.filter} -j TPROXY --on-port {0.port} --tproxy-mark {0.mark}".format(options))
         if options.deconfigure:
             cf.set_max_level()
 
