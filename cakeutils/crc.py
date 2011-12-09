@@ -5,7 +5,7 @@ class _CRC_metaclass(type):
     @staticmethod
     def _precalc_table_reflect(crcpoly, sz):
         t = []
-        for i in xrange(265):
+        for i in xrange(256):
             crc = i
             for j in range(8):
                 b0 = crc & 1
@@ -19,7 +19,7 @@ class _CRC_metaclass(type):
         t = []
         hbmsk = (1<<(sz-1))
         msk = (1<<sz)-1
-        for i in xrange(265):
+        for i in xrange(256):
             crc = i<<(sz-8)
             for j in range(8):
                 bsz = crc & hbmsk
