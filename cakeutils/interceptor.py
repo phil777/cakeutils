@@ -7,6 +7,7 @@ import os
 from select import select
 #import nfqueue
 import cakeutils
+import signal
 
 
 class InterceptorException(Exception):
@@ -262,17 +263,34 @@ class Configurator:
     def set_max_level(self):
         self.level = len(self.init)
     
-    def configure(self):
-        for l in self.init:
-            for c in l:
-                self.command(c)
-            self.level+=1
-    def deconfigure(self):
-        while self.level:
-            for c in self.fini[self.level-1]:
-                self.command(c)
-                self.level -= 1
-            
+    def configure(self, force=False):
+        old_sigint = signal.signal(signal.SIGINT, signal.SIG_IGN)
+        try:
+            for l in self.init:
+                for c in l:
+                    try:
+                        self.command(c)
+                    except Exception, e:
+                        if not force:
+                            raise
+                        log.warning("Ignoring error: %s" % e)
+                self.level+=1
+        finally:
+            signal.signal(signal.SIGINT, old_sigint)
+    def deconfigure(self, force=False):
+        old_sigint = signal.signal(signal.SIGINT, signal.SIG_IGN)
+        try:
+            while self.level:
+                for c in self.fini[self.level-1]:
+                    try:
+                        self.command(c)
+                    except Exception, e:
+                        if not force:
+                            raise
+                        log.warning("Ignoring error: %s" % e)
+                    self.level -= 1
+        finally:
+            signal.signal(signal.SIGINT, old_sigint)
                 
         
 
@@ -293,8 +311,8 @@ def main(*argv, **kargs):
                       help="intercept USER's connections", metavar="USER")
     parser.add_option("-C", dest="configure", action="store_true",
                       help="configure system")
-    parser.add_option("-D", dest="deconfigure", action="store_true",
-                      help="only configure system")
+    parser.add_option("-f", dest="force_config", action="store_true",
+                      help="force system configuration/deconfiguration and ignore errors")
     parser.add_option("--chain", dest="chain", default="INTERCEPT",
                       help="use CHAIN as NetFilter interception chain", metavar="CHAIN")
     parser.add_option("--mark", dest="mark", type="int", default=42,
@@ -314,7 +332,7 @@ def main(*argv, **kargs):
     log.info("Starting interceptor.")
 
     
-    if options.configure or options.deconfigure:
+    if options.configure:
         cf = Configurator()
         cf.add_init("iptables -t mangle -N {0.chain}".format(options))
         cf.add_fini("iptables -t mangle -X {0.chain}".format(options))
@@ -335,13 +353,11 @@ def main(*argv, **kargs):
         cf.add_fini("iptables -D INPUT -i {0.iface} -p tcp --dport {0.port} -j ACCEPT".format(options))
         cf.add_init("iptables -I INPUT -i {0.iface} -p udp --dport {0.port} -j ACCEPT".format(options))
         cf.add_fini("iptables -D INPUT -i {0.iface} -p udp --dport {0.port} -j ACCEPT".format(options))
-        if options.deconfigure:
-            cf.set_max_level()
 
     try:
         if options.configure:
             log.info("Configuring system")
-            cf.configure()    
+            cf.configure(force=options.force_config)
         
         intercept(options.port, callback=callback)
         
@@ -349,10 +365,12 @@ def main(*argv, **kargs):
         log.info("Interrupted by user")
 
     finally:
-
-        if options.configure or options.deconfigure:
-            log.info("Deconfiguring system")
-            cf.deconfigure()
+        try:
+            if options.configure:
+                log.info("Deconfiguring system")
+                cf.deconfigure(force=options.force_config)
+        except KeyboardInterrupt:
+            log.info("Interrupted by user 2")
 
     log.info("The End.")
 
