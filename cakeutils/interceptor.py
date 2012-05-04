@@ -296,6 +296,9 @@ class Configurator:
 
 def main(*argv, **kargs):
     callback = kargs.get("callback", cb_log)
+    cb_add_options = kargs.get("cb_add_options")
+    cb_options_parsed = kargs.get("cb_options_parsed")
+
     import optparse
 
     parser = optparse.OptionParser()
@@ -319,9 +322,12 @@ def main(*argv, **kargs):
                       help="use MARK as NetFilter packet mark for ip rule", metavar="MARK")
     parser.add_option("--table", dest="tablenum", type="int", default=101,
                       help="use TABLE for interception routing table number", metavar="TABLE")
-                 
+
+    cb_add_options(parser)
 
     (options,args) = parser.parse_args(list(argv))
+    
+    cb_options_parsed(options)
 
     # configure logging
     log.setLevel(logging.DEBUG)
