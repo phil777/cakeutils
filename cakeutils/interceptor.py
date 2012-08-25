@@ -355,10 +355,10 @@ def main(*argv, **kargs):
         cf.add_fini("iptables -t mangle -D PREROUTING -p udp -i {0.iface} {0.filter} -j TPROXY --on-port {0.port} --tproxy-mark {0.mark}".format(options))
         cf.add_init("iptables -t mangle -A PREROUTING -p tcp -i {0.iface} {0.filter} -j TPROXY --on-port {0.port} --tproxy-mark {0.mark}".format(options))
         cf.add_fini("iptables -t mangle -D PREROUTING -p tcp -i {0.iface} {0.filter} -j TPROXY --on-port {0.port} --tproxy-mark {0.mark}".format(options))
-        cf.add_init("iptables -I INPUT -i {0.iface} -p tcp --dport {0.port} -j ACCEPT".format(options))
-        cf.add_fini("iptables -D INPUT -i {0.iface} -p tcp --dport {0.port} -j ACCEPT".format(options))
-        cf.add_init("iptables -I INPUT -i {0.iface} -p udp --dport {0.port} -j ACCEPT".format(options))
-        cf.add_fini("iptables -D INPUT -i {0.iface} -p udp --dport {0.port} -j ACCEPT".format(options))
+        cf.add_init("iptables -I INPUT -i {0.iface} -p tcp -m mark --mark {0.mark} -j ACCEPT".format(options))
+        cf.add_fini("iptables -D INPUT -i {0.iface} -p tcp -m mark --mark {0.mark} -j ACCEPT".format(options))
+        cf.add_init("iptables -I INPUT -i {0.iface} -p udp -m mark --mark {0.mark} -j ACCEPT".format(options))
+        cf.add_fini("iptables -D INPUT -i {0.iface} -p udp -m mark --mark {0.mark} -j ACCEPT".format(options))
 
     try:
         if options.configure:
