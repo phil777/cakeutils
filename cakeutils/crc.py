@@ -112,7 +112,7 @@ class CRC:
         targets.append(target)
         if poly is None:
             if size == 16:
-                poly = set([0x1021])
+                poly = set([0x1021, 0x8005])
             elif size== 32:
                 poly = set([0x4c11db7])
         else:
