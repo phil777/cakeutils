@@ -347,6 +347,8 @@ def main(*argv, **kargs):
         cf.add_fini("iptables -t mangle -F {0.chain}".format(options))
         cf.add_init("iptables -t mangle -A PREROUTING -p tcp -m socket -j {0.chain}".format(options))
         cf.add_fini("iptables -t mangle -D PREROUTING -p tcp -m socket -j {0.chain}".format(options))
+        cf.add_init("iptables -t mangle -A PREROUTING -p udp -m socket -j {0.chain}".format(options))
+        cf.add_fini("iptables -t mangle -D PREROUTING -p udp -m socket -j {0.chain}".format(options))
         cf.add_init("ip rule add fwmark {0.mark} lookup {0.tablenum}".format(options))
         cf.add_fini("ip rule del fwmark {0.mark} lookup {0.tablenum}".format(options))
         cf.add_init("ip route add local 0/0 dev lo table {0.tablenum}".format(options))
