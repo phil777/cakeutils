@@ -105,4 +105,4 @@ if __name__ == "__main__":
     s.setsockopt(SOL_IP, IP_RECVORIGDSTADDR, 1)
     s.bind(("",4444))
     while True:
-        print "recv %r" % (recvmsg(s),)
+        print("recv %r" % (recvmsg(s),))

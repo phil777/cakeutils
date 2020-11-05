@@ -13,19 +13,19 @@ def strxor(a, b):
     "returns a^b, byte by byte. Shorter string wraps"
     la = len(a)
     lb = len(b)
-    return "".join(chr(ord(a[i%la])^ord(b[i%lb])) for i in xrange(max(la,lb)))
+    return "".join(chr(ord(a[i%la])^ord(b[i%lb])) for i in range(max(la,lb)))
 
 def stradd(a, b):
     "returns (a+b)%256, byte by byte. Shorter string wraps"
     la = len(a)
     lb = len(b)
-    return "".join(chr((ord(a[i%la])+ord(b[i%lb]))%256) for i in xrange(max(la,lb)))
+    return "".join(chr((ord(a[i%la])+ord(b[i%lb]))%256) for i in range(max(la,lb)))
 
 def strsub(a, b):
     "returns (a-b)%256, byte by byte. Shorter string wraps"
     la = len(a)
     lb = len(b)
-    return "".join(chr((ord(a[i%la])-ord(b[i%lb]))%256) for i in xrange(max(la,lb)))
+    return "".join(chr((ord(a[i%la])-ord(b[i%lb]))%256) for i in range(max(la,lb)))
 
 
 
@@ -47,16 +47,16 @@ def hexdump(x):
     l = len(x)
     i = 0
     while i < l:
-        print "%04x  " % i,
+        print("%04x  " % i, end=' ')
         for j in range(16):
             if i+j < l:
-                print "%02X" % ord(x[i+j]),
+                print("%02X" % ord(x[i+j]), end=' ')
             else:
-                print "  ",
+                print("  ", end=' ')
             if j%16 == 7:
-                print "",
-        print " ",
-        print printable(x[i:i+16])
+                print("", end=' ')
+        print(" ", end=' ')
+        print(printable(x[i:i+16]))
         i += 16
 
 def shexdump(x):

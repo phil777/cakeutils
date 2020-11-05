@@ -5,7 +5,7 @@ class _CRC_metaclass(type):
     @staticmethod
     def _precalc_table_reflect(crcpoly, sz):
         t = []
-        for i in xrange(256):
+        for i in range(256):
             crc = i
             for j in range(8):
                 b0 = crc & 1
@@ -19,7 +19,7 @@ class _CRC_metaclass(type):
         t = []
         hbmsk = (1<<(sz-1))
         msk = (1<<sz)-1
-        for i in xrange(256):
+        for i in range(256):
             crc = i<<(sz-8)
             for j in range(8):
                 bsz = crc & hbmsk
@@ -74,18 +74,17 @@ class _CRC_metaclass(type):
         return ("<%s size=%i poly=%x init=%x xor=%x reflect_input=%x reflect_output=%x>" % (self.name,
                 self.size, self.poly, self.init, self.xor, self.reflect_input, self.reflect_output))
     def python(self):
-        print ('class %(name)s(CRC):\n'
+        print(('class %(name)s(CRC):\n'
                +'\tname="%(name)s"'
                +'\n\tpoly=%(poly)#x'
                +'\n\tsize=%(size)i'
                +'\n\tinit=%(init)#x'
                +'\n\txor=%(xor)#x'
                +'\n\treflect_input=%(reflect_input)r'
-               +'\n\treflect_output=%(reflect_output)r') % self.__dict__
+               +'\n\treflect_output=%(reflect_output)r') % self.__dict__)
 
 
-class CRC:
-    __metaclass__ = _CRC_metaclass
+class CRC(metaclass=_CRC_metaclass):
     name = ""
     list = []
     size = 0
@@ -129,11 +128,11 @@ class CRC:
                                            reflect_input=reflin, reflect_output=reflcrc)
                             c = crc(msg)
                             if c in targets:
-                                print ("Got %%0%ix with %%r" % (size/4))% (c,crc)
+                                print(("Got %%0%ix with %%r" % (size/4))% (c,crc))
                                 res.append(crc)
                             smatch = find_substring_from_crc(crc, msg, *targets)
                             if smatch:
-                                print "Got substring match with %r: %r" % (crc,smatch)
+                                print("Got substring match with %r: %r" % (crc,smatch))
                                 res.append(crc)
         return res
                 
@@ -144,20 +143,20 @@ class CRC:
         notdone = 0
         for crc in cls.list:
             if not crc.test_vector:
-                print "%15s: no test vector" % crc.name
+                print("%15s: no test vector" % crc.name)
                 notdone += 1
                 continue
             tvin,tvout = crc.test_vector
             res = crc(tvin)
             if res == tvout:
                 passed += 1
-                print "%15s: PASSED: crc(%r)=%#x" % (crc.name,tvin,res)
+                print("%15s: PASSED: crc(%r)=%#x" % (crc.name,tvin,res))
             else:
                 failed += 1
-                print "%15s: FAILED: crc(%r)=%#x instead of %#x" % (crc.name,
+                print("%15s: FAILED: crc(%r)=%#x instead of %#x" % (crc.name,
                                                                     tvin, res,
-                                                                    tvout)
-        print "PASSED=%i FAILED=%i  Not done=%i" % (passed, failed, notdone)
+                                                                    tvout))
+        print("PASSED=%i FAILED=%i  Not done=%i" % (passed, failed, notdone))
 
         return failed == 0
 

@@ -46,7 +46,7 @@ class NF_REDIRECT_MITM:
                     ssock = socket.socket()
                     try:
                         ssock.connect(srv)
-                    except socket.error,e:
+                    except socket.error as e:
                         log.info("Could not connect to %s:%i: %s" % (srv[0],srv[1],e))
                         continue
 

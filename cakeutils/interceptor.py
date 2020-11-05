@@ -51,7 +51,7 @@ def intercept(port, udp=True, tcp=True, callback = cb_log):
     def protected_callback(cnxid, dir, data, callback=callback):
         try:
             return callback(cnxid, dir, data)
-        except Exception,e:
+        except Exception as e:
             log.exception("Callback exception on %s" % dispcnx(cnxid,dir))
 
     selsock = set()
@@ -106,7 +106,7 @@ def intercept(port, udp=True, tcp=True, callback = cb_log):
             cnxid,dir = infos[sk]
             try:
                 sk.send("")
-            except socket.error,e:
+            except socket.error as e:
                 log.info("Failed to connect %s: %s" % (dispcnx(cnxid,dir), e))
                 close_pair(sk, tcp_pairs)
             else:
@@ -134,7 +134,7 @@ def intercept(port, udp=True, tcp=True, callback = cb_log):
 #                    t2.bind(src)
                     try:
                         t2.connect(dst)
-                    except socket.error,e:
+                    except socket.error as e:
                         if e.errno != 115:
                             log.warning("Failed to connect to %s:%u: %s" (dst+(e,)))
                             continue
@@ -189,7 +189,7 @@ def intercept(port, udp=True, tcp=True, callback = cb_log):
                         data = d2
                     try:
                         t2.send(data)
-                    except socket.error,e:
+                    except socket.error as e:
                         log.info("Closing UDP %s (%s)" % (dispcnx(cnxid, 1),e))
                         intudp.remove(t)
                         intudp.remove(t2)
@@ -221,7 +221,7 @@ def intercept(port, udp=True, tcp=True, callback = cb_log):
                     sk2 = udp_pairs[sk]
                     try:
                         data = sk.recv(8192)
-                    except socket.error,e:
+                    except socket.error as e:
                         if e.errno in [111,113]: # connection refused/no route to host
                             log.info("UDP failed for %s (%s). Closing." % (e,dispcnx(cnxid, dir)))
                             intudp.remove(sk)
@@ -240,9 +240,9 @@ def intercept(port, udp=True, tcp=True, callback = cb_log):
                     sk2.send(data)
             except KeyboardInterrupt:
                 raise
-            except socket.error,e:
+            except socket.error as e:
                 log.exception("socket error: %s" % e)
-            except Exception,e:
+            except Exception as e:
                 log.exception("Unhandled exception")
 
 
@@ -270,7 +270,7 @@ class Configurator:
                 for c in l:
                     try:
                         self.command(c)
-                    except Exception, e:
+                    except Exception as e:
                         if not force:
                             raise
                         log.warning("Ignoring error: %s" % e)
@@ -284,7 +284,7 @@ class Configurator:
                 for c in self.fini[self.level-1]:
                     try:
                         self.command(c)
-                    except Exception, e:
+                    except Exception as e:
                         if not force:
                             raise
                         log.warning("Ignoring error: %s" % e)

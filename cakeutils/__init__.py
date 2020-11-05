@@ -7,11 +7,11 @@
 
 
 
-from strings import *
-from log import *
-from cstruct import *
-from crc import *
-from recvmsg import recvmsg
-import interceptor
-from daemon import daemonize
-from sidelog import SideLog
+from .strings import *
+from .log import *
+from .cstruct import *
+from .crc import *
+from .recvmsg import recvmsg
+from . import interceptor
+from .daemon import daemonize
+from .sidelog import SideLog

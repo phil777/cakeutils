@@ -1,17 +1,17 @@
 #! /usr/bin/env python
 
 import struct
+from functools import reduce
 
 class _Cstruct_Metaclass(type):
     def __new__(cls, name, bases, dct):
         o = super(_Cstruct_Metaclass, cls).__new__(cls, name, bases, dct)
-        o._packstring =  o._packformat+"".join(map(lambda x:x[1],o._fields))
+        o._packstring =  o._packformat+"".join([x[1] for x in o._fields])
         o._size = struct.calcsize(o._packstring)
         return o
     
 
-class CStruct(object):
-    __metaclass__ = _Cstruct_Metaclass
+class CStruct(object, metaclass=_Cstruct_Metaclass):
     _packformat = ""
     _fields = []
 
@@ -20,7 +20,7 @@ class CStruct(object):
         return cls(f.read(cls._size))
     
     def __init__(self, *args, **kargs):
-        self._names = map(lambda x:x[0], self._fields)
+        self._names = [x[0] for x in self._fields]
         if kargs:
             self.__dict__.update(kargs)
         else:
@@ -38,10 +38,10 @@ class CStruct(object):
 
     def _pack(self):
         return struct.pack(self._packstring,
-                           *map(lambda x: getattr(self, x), self._names))
+                           *[getattr(self, x) for x in self._names])
 
     def _spack(self, superstruct, shift=0):
-        attr0 = map(lambda x: getattr(self, x), self._names)
+        attr0 = [getattr(self, x) for x in self._names]
         attr = []
         for s in attr0:
             if isinstance(s,CStruct):
@@ -65,16 +65,16 @@ class CStruct(object):
         return self._pack()
 
     def __repr__(self):
-        return "<%s=%s>" % (self.__class__.__name__, "/".join(map(lambda x:repr(getattr(self,x[0])),self._fields)))
+        return "<%s=%s>" % (self.__class__.__name__, "/".join([repr(getattr(self,x[0])) for x in self._fields]))
 
     def __getitem__(self, item): # to work with format strings
         return getattr(self, item)
 
     def _show(self):
-        print "##%s:" % self.__class__.__name__
-        fmt = "%%-%is = %%r" % max(map(lambda x:len(x[0]), self._fields))
+        print("##%s:" % self.__class__.__name__)
+        fmt = "%%-%is = %%r" % max([len(x[0]) for x in self._fields])
         for fn,ft in self._fields:
-            print fmt % (fn,getattr(self,fn))
+            print(fmt % (fn,getattr(self,fn)))
 
 class CStructStruct:
     def __init__(self, lst, shift=0):
